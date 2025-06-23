@@ -1,0 +1,33 @@
+name: 🚨 Commitlint Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  commitlint:
+    name: Valida mensagens de commit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clona repositório
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # necessário para ver todos os commits
+
+      - name: Instala Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Instala dependências do commitlint
+        run: |
+          npm install --save-dev @commitlint/{config-conventional,cli}
+
+      - name: Cria config do commitlint
+        run: |
+          echo "module.exports = {extends: ['@commitlint/config-conventional']}" > commitlint.config.js
+
+      - name: Executa commitlint nos commits do PR
+        run: |
+          npx commitlint --from origin/main --to HEAD --verbose
